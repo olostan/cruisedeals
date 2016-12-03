@@ -1,0 +1,7 @@
+name: cruisedeals
+uses-material-design: true
+assets:
+  - assets/last.json
+  - assets/header-logo-2016.png
+  - assets/deals/1.jpg
+  - assets/deals/2.jpg
