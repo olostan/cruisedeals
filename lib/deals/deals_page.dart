@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert' show JSON;
+import 'dart:io';
 import 'package:cruisedeals/deals/deal_card.dart';
 import 'package:cruisedeals/deals/deal_page.dart';
 import 'package:cruisedeals/deals/deals_logo.dart';
@@ -8,6 +9,8 @@ import 'package:cruisedeals/models/userConfig.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/http.dart' as http;
+import 'package:flutter/services.dart';
+
 
 //const double _kAppBarHeight = 128.0;
 const double _kAppBarHeight = 128.0;
@@ -24,39 +27,43 @@ class DealsPage extends StatefulWidget {
 class DealsPageState extends State<DealsPage> {
   static final GlobalKey<ScrollableState> scrollableKey = new GlobalKey<ScrollableState>();
 
-  DealsPageState() {
-    /*rootBundle
-        .loadStructuredData('assets/last.json', (d) => JSON.decode(d))
-        .then((List<Map<String, String>> data) =>
-        data.map((d) =>
-          new Deal.fromMap(d)
-        ).toList(growable: false))
-        .then((deals) {
-      //this.setState();
-      this.setState(() {
-        this.deals = deals;
-      });
-    });*/
+  @override
+  initState() {
+    super.initState();
+    loadFromCache();
     reload();
-
-    //var request = HttpRequest.getString(url).then(onDataLoaded);
   }
 
-  Future<Null> reload() {
+  Future<File> _getLocalFile() async {
+    // get the path to the document directory.
+    String dir = (await PathProvider.getTemporaryDirectory()).path;
+    return new File('$dir/deals.json');
+  }
+
+  loadFromCache() async {
+    File file = await _getLocalFile();
+    if (!(await file.exists())) return;
+    var content = await file.readAsString();
+    _setDealsFromString(content);
+  }
+
+
+  Future<Null> reload() async {
     print("Reloading...");
-    loading = true;
-    return http
-        .get(
-            'https://www.cruisedeals.co.uk/wp-json/wp/v2/posts/?_embed=featuredmedia&per_page=10')
-        .then((r) => JSON.decode(r.body))
-        .then((List<Map<String, String>> data) =>
-            data.map((d) => new Deal.fromMap(d)).toList(growable: false))
-        .then((deals) {
-      //this.setState();
-      this.setState(() {
-        loading = false;
-        this.deals = deals;
-      });
+    setState(() { loading = true;});
+    var content = await http
+        .get('https://www.cruisedeals.co.uk/wp-json/wp/v2/posts/?_embed=featuredmedia&per_page=10');
+    _setDealsFromString(content.body);
+    File file = await _getLocalFile();
+    await file.writeAsString(content.body);
+    setState(() { loading = false;});
+  }
+
+  void _setDealsFromString(String s)  {
+    var data = JSON.decode(s);
+    var deals = data.map((d) => new Deal.fromMap(d)).toList(growable: false);
+    setState(() {
+      this.deals = deals;
     });
   }
 
