@@ -1,7 +1,11 @@
 name: cruisedeals
 uses-material-design: true
 assets:
-  - assets/last.json
   - assets/header-logo-2016.png
-  - assets/deals/1.jpg
-  - assets/deals/2.jpg
+  - assets/lines/celebrity-logo.png
+  - assets/lines/cunard-logo.png
+  - assets/lines/logo-ncl.png
+  - assets/lines/logo-thomson.png
+  - assets/lines/pando.png
+  - assets/lines/royal-caribbean-logo.png
+

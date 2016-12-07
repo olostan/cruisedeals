@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="name.olostan.cruisedeals"
-    android:versionCode="1"
-    android:versionName="0.0.1">
+    package="com.yourcompany.cruisedeals"
+    android:versionCode="4"
+    android:versionName="0.0.4">
 
     <uses-sdk android:minSdkVersion="16" android:targetSdkVersion="21" />
 

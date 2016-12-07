@@ -1,20 +1,20 @@
 import 'package:cruisedeals/models/userConfig.dart';
 import 'package:flutter/material.dart';
 
-class _CruiseLineItem extends StatefulWidget {
-  _CruiseLineItem({Key key, String this.name, this.initialValue, this.onChanged})
+class _CheckableItem extends StatefulWidget {
+  _CheckableItem({Key key, this.initialValue, this.onChanged, this.child})
       : super(key: key);
 
-  final String name;
   final bool initialValue;
   final ValueChanged<bool> onChanged;
+  final Widget child;
 
   @override
-  State<StatefulWidget> createState() => new _CruiseLineItemState(initialValue);
+  State<StatefulWidget> createState() => new _CheckableItemState(initialValue);
 }
 
-class _CruiseLineItemState extends State<_CruiseLineItem> {
-  _CruiseLineItemState(this.value): super();
+class _CheckableItemState<T> extends State<_CheckableItem> {
+  _CheckableItemState(this.value): super();
   bool value;
 
   @override
@@ -33,15 +33,54 @@ class _CruiseLineItemState extends State<_CruiseLineItem> {
                   new Icon(value?Icons.check_circle:Icons.check_circle_outline, size: 36.0, color: Colors.black),
                   new Padding(
                       padding: const EdgeInsets.only(left: 16.0),
-                      child: new Text(this.config.name)
+                      child: config.child
                   )
                 ]
             )
         )
     );
-
   }
 }
+
+
+class _CruiseLineItem extends StatelessWidget {
+  _CruiseLineItem({Key key, CruiseLine this.line, this.initialValue, this.onChanged})
+      : super(key: key);
+
+  final CruiseLine line;
+  final bool initialValue;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return new _CheckableItem(
+        initialValue: initialValue,
+        onChanged: onChanged,
+        child: new Center( child: new Image.asset("assets/lines/${line.icon}",height: 35.0))
+    );
+  }
+
+}
+
+class _TextCheckableItem extends StatelessWidget {
+  _TextCheckableItem({Key key, this.text, this.initialValue, this.onChanged})
+      : super(key: key);
+
+  final String text;
+  final bool initialValue;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return new _CheckableItem(
+        initialValue: initialValue,
+        onChanged: onChanged,
+        child: new Text(text)
+    );
+  }
+
+}
+
 
 
 class LoginPage extends StatefulWidget {
@@ -59,6 +98,7 @@ class LoginPageState extends State<LoginPage> {
 
   Set<String> lines = new Set<String>();
   Set<String> destinations = new Set<String>();
+  Set<String> times = new Set<String>();
 
   @override
   Widget build(BuildContext context) {
@@ -102,7 +142,7 @@ class LoginPageState extends State<LoginPage> {
                 ]))));
   }
 
-  void _openDeals(BuildContext context) {
+/*  void _openDeals(BuildContext context) {
     Navigator.popAndPushNamed(context,"/deals");
     /*Navigator.popAndPushNamed(context, new MaterialPageRoute<Null>(
         settings: const RouteSettings(name: "/deals"),
@@ -110,7 +150,7 @@ class LoginPageState extends State<LoginPage> {
           return new DealsPage();
         }
     ));*/
-  }
+  }*/
 
   Widget _buildLoginWidget(Color color) {
     return new SizedBox(
@@ -150,84 +190,73 @@ class LoginPageState extends State<LoginPage> {
             children: [
               new SizedBox(height: 20.0),
               new Text("Your favourite cruise lines:",textAlign: TextAlign.center),
-              new RaisedButton(child: new Text(lines.length==0?"Click here ot select":lines.join(", ")),onPressed: () {
+              new RaisedButton(child: _GetTextForBox(lines, CruiseLines),onPressed: () {
                 showDialog(context:context,child:_cruiseLinesDialog());
               }),
               new SizedBox(height: 20.0),
-              new Text("Destinations you want to visit::",textAlign: TextAlign.center),
-              new RaisedButton(child: new Text(destinations.length==0?"Click here ot select":destinations.join(", ")),onPressed: () {
+              new Text("Destinations you want to visit:",textAlign: TextAlign.center),
+              new RaisedButton(child: _GetTextForBox(destinations, Destinations),onPressed: () {
                 showDialog(context:context,child:_cruiseDestinationsDialog());
               }),
               new SizedBox(height: 20.0),
               new Text("Times of the year you’d like to cruise:",textAlign: TextAlign.center),
-              new RaisedButton(child: new Text("Click here ot select"),onPressed: () {}),
+              new RaisedButton(child: _GetTextForBox(times, TimesOfYear),onPressed: () {
+                showDialog(context:context,child:_TimesDialog());
+              }),
               new SizedBox(height: 20.0),
               new Text("Length of time you’d like to cruise for:",textAlign: TextAlign.center),
-              new RaisedButton(child: new Text("Click here ot select"),onPressed: () {}),
+              new RaisedButton(child: new Text(_GetTextForLength()),onPressed: () {}),
             ])));
   }
+  String _GetTextForLength() {
+    if (config.userConfig==null) return "Click here to select";
+    return "${config.userConfig.lengthMin}-${config.userConfig.lengthMax}";
+  }
+  Widget _GetTextForBox(Set<String> values, List<KeyName> dic) {
+    if (values.length ==0) return new Text("Click here ot select");
+    var names = values.map((v) => dic.firstWhere((e)=>e.key==v).name);
+    if (names.length<=2) return new Text(names.join(", "));
+    else return new Text("${names.take(2).join(", ")} and ${names.length-2} more");
+  }
+
   Widget _cruiseLinesDialog() {
     return new SimpleDialog(
         title: new Text('Select Cruise Lines'),
-        children: <Widget>[
-          new _CruiseLineItem(
-              name:"Royal Caribian",
-              onChanged: (value) { //Navigator.pop(context, 'username@gmail.com');
-                setState(() {
-                  if (value) lines.add("royal");
-                  else lines.remove("royal");
-                });
-              },
-              initialValue: lines.contains("royal")
-          ),
-          new _CruiseLineItem(
-              name:"Thomas Cruises",
-              onChanged: (value) { //Navigator.pop(context, 'username@gmail.com');
-                setState(() {
-                  if (value) lines.add("thomas");
-                  else lines.remove("thomas");
-                });
-              },
-              initialValue: lines.contains("thomas")
-          ),
+        children: <Widget>[]..addAll(CruiseLines.map((line) => new _CruiseLineItem(
+            line: line,
+            onChanged: (value) {
+              setState(() {
+                if (value) lines.add(line.key);
+                else lines.remove(line.key);
+              });
+            },
+            initialValue: lines.contains(line.key)
+        )).toList(growable: false))..add(
           new RaisedButton(
               color: new Color(0xfff8ae4c),
               child: new Text("Confirm Selection", style: new TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
               onPressed: ()  {
                   Navigator.pop(context);
               }
-          )
-        ]
+          ))
     );
   }
 
-  Widget _destinationRow(String destination) {
-    return new _CruiseLineItem(name: destination,initialValue: destinations.contains(destination),onChanged: (value) {
+  Widget _KeyNameRow(KeyName item, Set<String> values) {
+    return new _TextCheckableItem(text: item.name,initialValue: values.contains(item.key),onChanged: (value) {
       setState( () {
         if (value)
-          destinations.add(destination);
+          values.add(item.key);
         else
-          destinations.remove(destination);
+          values.remove(item.key);
       });
     });
-    /*
-    return new Row(
-        children: [
-          new Checkbox(value: destinations.contains(d),onChanged: (value) {
-            if (value) destinations.add(d);
-            else destinations.remove(d);
-          }),
-          new Text(d)
 
-        ]
-    );*/
   }
   Widget _cruiseDestinationsDialog() {
     return new SimpleDialog(
         title: new Text('Select Destinations'),
-        children: <Widget>[
-          _destinationRow("meditarian"),
-          _destinationRow("caribian"),
+        children: (Destinations.map((d) => _KeyNameRow(d,destinations)).toList(growable: true))..add(
           new RaisedButton(
               color: new Color(0xfff8ae4c),
               child: new Text("Confirm Selection", style: new TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
@@ -235,7 +264,21 @@ class LoginPageState extends State<LoginPage> {
                 Navigator.pop(context);
               }
           )
-        ]
+        )
+    );
+  }
+  Widget _TimesDialog() {
+    return new SimpleDialog(
+        title: new Text('Select Times of the year'),
+        children: (TimesOfYear.map((t) => _KeyNameRow(t,times)).toList(growable: true))..add(
+            new RaisedButton(
+                color: new Color(0xfff8ae4c),
+                child: new Text("Confirm Selection", style: new TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                onPressed: ()  {
+                  Navigator.pop(context);
+                }
+            )
+        )
     );
   }
 

@@ -1,20 +1,30 @@
 
-class CruiseLine {
-  String key;
-  String name;
+abstract class KeyName {
+  final String key;
+  final String name;
+  KeyName(this.key, this.name);
+}
+
+class CruiseLine implements KeyName {
+  final String key;
+  final String name;
+  final String icon;
+
+  const CruiseLine(this.key, this.name, this.icon);
+
   toJson() => key;
 }
 
-final List<CruiseLine> CruiseLines =  [
-  new CruiseLine()..key="royal"..name="Royal Caribbian",
-  new CruiseLine()..key="thomson"..name="Thomson",
-  new CruiseLine()..key="celebrity"..name="Celebrity Cruises",
-  new CruiseLine()..key="gunard"..name="Gunard",
-  new CruiseLine()..key="pno"..name="PnO Cruises",
-  new CruiseLine()..key="norwegian"..name="Norwegian",
+const List<CruiseLine> CruiseLines = const [
+  const CruiseLine("royal","Royal Caribbian","royal-caribbean-logo.png"),
+  const CruiseLine("thomson","Thomson","logo-thomson.png"),
+  const CruiseLine("celebrity","Celebrity Cruises","celebrity-logo.png"),
+  const CruiseLine("cunard","Cunard","cunard-logo.png"),
+  const CruiseLine("pno","PnO Cruises","pando.png"),
+  const CruiseLine("norwegian","Norwegian","logo-ncl.png"),
 ];
 
-class Destination {
+class Destination implements KeyName {
   String key,name;
   toJson() => key;
 }
@@ -24,7 +34,7 @@ final List<Destination> Destinations =  [
   new Destination()..key="carribbean"..name="Carribbean",
 ];
 
-class TimeOfYear {
+class TimeOfYear implements KeyName  {
   const TimeOfYear(this.key, this.name);
   final String key, name;
   toJson() => key;
@@ -49,6 +59,8 @@ class UserConfig {
   List<String> lines;
   List<String> destinations;
   List<String> times;
+  int lengthMin=1;
+  int lengthMax=14;
   bool onBoarded = false;
 
   UserConfig.FromMap(map) {
@@ -58,8 +70,16 @@ class UserConfig {
     this.destinations = map["destinations"];
     this.times = map["times"];
     this.onBoarded = map["onBoarded"];
+    try {
+      this.lengthMin = int.parse(map["lengthMin"]??"1");
+      this.lengthMin = int.parse(map["lengthMin"]??"14");
+    } catch(e) {
+
+    }
   }
-  toJson() => {"name":name,"email":email,"lines":lines,"destinations":destinations, "times":times, "onBoarded": onBoarded};
+  toJson() => {
+    "name":name,"email":email,"lines":lines,"destinations":destinations, "times":times,
+    "onBoarded": onBoarded,"lengthMin":lengthMin,"lengthMax":lengthMax};
   toString() => "UserConfig(${toJson()})";
 }
 
