@@ -1,4 +1,4 @@
-import 'package:cruisedeals/deals/deals_page.dart';
+import 'package:cruisedeals/models/userConfig.dart';
 import 'package:flutter/material.dart';
 
 class _CruiseLineItem extends StatefulWidget {
@@ -45,15 +45,17 @@ class _CruiseLineItemState extends State<_CruiseLineItem> {
 
 
 class LoginPage extends StatefulWidget {
-  LoginPage({Key key}) : super(key: key);
+  UserConfigUpdate onUpdateConfig;
+  UserConfig userConfig;
+
+  LoginPage({Key key, UserConfigUpdate this.onUpdateConfig, this.userConfig}) : super(key: key);
 
   @override
-  _LoginPageState createState() => new _LoginPageState();
+  LoginPageState createState() => new LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
-
-  int step = 0;
+class LoginPageState extends State<LoginPage> {
+  int get step => config.userConfig==null||config.userConfig.email==null?0:1;
 
   Set<String> lines = new Set<String>();
   Set<String> destinations = new Set<String>();
@@ -83,13 +85,18 @@ class _LoginPageState extends State<LoginPage> {
                   step==0?new RaisedButton(
                       child: new Text("Skip this step"), onPressed: ()  {
                     setState(() {
-                      step = 1;} );
+                      var userConfig = new UserConfig.Anonymous();
+                      this.config.onUpdateConfig(userConfig);
+                      } );
                   }):new RaisedButton(
                       color: new Color(0xff8dbd35),
                       child: new Text("Take me to the Deals!", style: new TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20.0)), onPressed: ()  {
                     setState(() {
                       //step = 0;
-                      _openDeals(context);
+                      config.userConfig.onBoarded = true;
+                      this.config.onUpdateConfig(config.userConfig);
+
+                      //_openDeals(context);
                     } );
                   })
                 ]))));
@@ -194,23 +201,23 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _destinationRow(String dest) {
-    return new _CruiseLineItem(name: dest,initialValue: destinations.contains(dest),onChanged: (value) {
+  Widget _destinationRow(String destination) {
+    return new _CruiseLineItem(name: destination,initialValue: destinations.contains(destination),onChanged: (value) {
       setState( () {
         if (value)
-          destinations.add(dest);
+          destinations.add(destination);
         else
-          destinations.remove(dest);
+          destinations.remove(destination);
       });
     });
     /*
     return new Row(
         children: [
-          new Checkbox(value: destinations.contains(dest),onChanged: (value) {
-            if (value) destinations.add(dest);
-            else destinations.remove(dest);
+          new Checkbox(value: destinations.contains(d),onChanged: (value) {
+            if (value) destinations.add(d);
+            else destinations.remove(d);
           }),
-          new Text(dest)
+          new Text(d)
 
         ]
     );*/

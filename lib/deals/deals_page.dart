@@ -1,26 +1,30 @@
+import 'dart:async';
 import 'dart:convert' show JSON;
 import 'package:cruisedeals/deals/deal_card.dart';
 import 'package:cruisedeals/deals/deal_page.dart';
 import 'package:cruisedeals/deals/deals_logo.dart';
 import 'package:cruisedeals/models/deal.dart';
+import 'package:cruisedeals/models/userConfig.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/http.dart' as http;
 
+//const double _kAppBarHeight = 128.0;
 const double _kAppBarHeight = 128.0;
 
 class DealsPage extends StatefulWidget {
-  DealsPage({Key key, this.scrollableKey}) : super(key: key);
+  UserConfig userConfig;
 
-  final GlobalKey<ScrollableState> scrollableKey;
+  DealsPage({Key key, UserConfig this.userConfig}) : super(key: key);
 
   @override
-  _DealsPageState createState() => new _DealsPageState();
+  DealsPageState createState() => new DealsPageState();
 }
 
-class _DealsPageState extends State<DealsPage> {
-  _DealsPageState() {
+class DealsPageState extends State<DealsPage> {
+  static final GlobalKey<ScrollableState> scrollableKey = new GlobalKey<ScrollableState>();
+
+  DealsPageState() {
     /*rootBundle
         .loadStructuredData('assets/last.json', (d) => JSON.decode(d))
         .then((List<Map<String, String>> data) =>
@@ -38,9 +42,10 @@ class _DealsPageState extends State<DealsPage> {
     //var request = HttpRequest.getString(url).then(onDataLoaded);
   }
 
-  void reload() {
+  Future<Null> reload() {
+    print("Reloading...");
     loading = true;
-    http
+    return http
         .get(
             'https://www.cruisedeals.co.uk/wp-json/wp/v2/posts/?_embed=featuredmedia&per_page=10')
         .then((r) => JSON.decode(r.body))
@@ -65,7 +70,8 @@ class _DealsPageState extends State<DealsPage> {
     final double statusBarHeight = MediaQuery.of(context).padding.top;
     return new Scaffold(
         key: scaffoldKey,
-        scrollableKey: config.scrollableKey,
+        scrollableKey: scrollableKey,
+        backgroundColor: Colors.grey[300],
         appBarBehavior: AppBarBehavior.under,
         appBar: buildAppBar(context, statusBarHeight),
         /*floatingActionButton: new FloatingActionButton(
@@ -112,35 +118,19 @@ class _DealsPageState extends State<DealsPage> {
         }));
   }
 
-  double overscroll = 0.0;
 
   Widget buildBody(BuildContext context, double statusBarHeight) {
     final EdgeInsets padding = new EdgeInsets.fromLTRB(
         8.0, 8.0 + _kAppBarHeight + statusBarHeight, 8.0, 8.0);
-    return new Stack(children: [
-      new Positioned(
-          left: 0.0,
-          top: 170.0,
-          right: 0.0,
-          child: new Opacity(
-              opacity: overscroll,
-              child: new Center(
-                  child: new Transform(
-                      alignment: FractionalOffset.center,
-                      transform: new Matrix4.rotationZ(overscroll * 3 * 3.14),
-                      child: new Icon(Icons.refresh, size: 50.0))))),
+    print("Sc key ${scrollableKey}");
+    return new RefreshIndicator(
+        refresh: reload,
+        scrollableKey: scrollableKey,
+      displacement: 160.0,
+        location: RefreshIndicatorLocation.both,
+        child:
       new ScrollableGrid(
-          scrollableKey: config.scrollableKey,
-          onScroll: (offset) {
-            var newOverscroll = 1 - (100.0 + offset).clamp(0.0, 100.0) / 100.0;
-            if (newOverscroll != overscroll)
-              setState(() {
-                overscroll = newOverscroll;
-                if (overscroll == 1 && !loading) {
-                  reload();
-                }
-              });
-          },
+          scrollableKey: scrollableKey,
           delegate: new MaxTileWidthGridDelegate(
               rowSpacing: 8.0,
               columnSpacing: 8.0,
@@ -153,7 +143,7 @@ class _DealsPageState extends State<DealsPage> {
                   showDealPage(context, deal);
                 });
           })),
-    ]);
+    );
   }
 
   void showDealPage(BuildContext context, Deal deal) {
