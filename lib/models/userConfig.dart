@@ -83,4 +83,4 @@ class UserConfig {
   toString() => "UserConfig(${toJson()})";
 }
 
-typedef void UserConfigUpdate(UserConfig newConfig);
+typedef void UserConfigChanger(UserConfig newConfig);

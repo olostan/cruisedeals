@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 
 
 class DealsLogo extends StatefulWidget {
-  DealsLogo({this.height, this.t});
+  DealsLogo({this.height, this.t, this.onSettings});
 
   final double height;
   final double t;
+  final VoidCallback onSettings;
 
   @override
   _DealsLogoState createState() => new _DealsLogoState();
@@ -88,6 +89,14 @@ class _DealsLogoState extends State<DealsLogo> {
               child: new Opacity(opacity: _textOpacity.transform(config.t),child:
                new Text("0800 107 1590", style: new TextStyle(color: Colors.white,fontWeight: FontWeight.bold, fontSize: 28.0),textAlign: TextAlign.center)
           )),
+          new Positioned(right: 10.0, top:75.0-_upPosition.transform(1-config.t)*55,
+              child: new Opacity(opacity: _textOpacity.transform(config.t),child:
+                  new InkWell(
+                      onTap: config.onSettings,
+                      child:
+                new Icon(Icons.settings, color: Colors.white))
+              )
+          ),
           new Positioned(right: 10.0, child:
               new Column(
                   crossAxisAlignment: CrossAxisAlignment.end,

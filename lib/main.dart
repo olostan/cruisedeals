@@ -71,6 +71,14 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  void updateConfig(UserConfig config) {
+    setState(() {
+      print("Got new config: ${config}");
+      userConfig = config;
+      _getLocalFile().then((f) => f.writeAsString(JSON.encode(config)));
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return
@@ -83,13 +91,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: new CircularProgressIndicator()
         ):
       userConfig.onBoarded?
-        new DealsPage(key:dealsKey, userConfig:userConfig)
-          :new LoginPage(key:loginKey, userConfig:userConfig, onUpdateConfig: (newConfig) {
-              setState(() {
-                print("Got new config: ${newConfig}");
-                userConfig = newConfig;
-                _getLocalFile().then((f) => f.writeAsString(JSON.encode(newConfig)));
-              });
-      });
+        new DealsPage(key:dealsKey, userConfig:userConfig, changer: updateConfig)
+          :new LoginPage(key:loginKey, userConfig:userConfig, onUpdateConfig: updateConfig);
   }
 }

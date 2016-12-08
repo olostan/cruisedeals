@@ -17,8 +17,9 @@ const double _kAppBarHeight = 128.0;
 
 class DealsPage extends StatefulWidget {
   UserConfig userConfig;
+  UserConfigChanger changer;
 
-  DealsPage({Key key, UserConfig this.userConfig}) : super(key: key);
+  DealsPage({Key key,this.userConfig, this.changer}) : super(key: key);
 
   @override
   DealsPageState createState() => new DealsPageState();
@@ -41,18 +42,22 @@ class DealsPageState extends State<DealsPage> {
   }
 
   loadFromCache() async {
+    print("Getting from cache");
     File file = await _getLocalFile();
     if (!(await file.exists())) return;
     var content = await file.readAsString();
     _setDealsFromString(content);
+    print("Loaded from cache");
   }
 
 
   Future<Null> reload() async {
     print("Reloading...");
     setState(() { loading = true;});
+
     var content = await http
         .get('https://www.cruisedeals.co.uk/wp-json/wp/v2/posts/?_embed=featuredmedia&per_page=10');
+
     _setDealsFromString(content.body);
     File file = await _getLocalFile();
     await file.writeAsString(content.body);
@@ -121,7 +126,11 @@ class DealsPageState extends State<DealsPage> {
               padding: new EdgeInsets.only(
                   top: statusBarHeight + 0.5 * extraPadding,
                   bottom: extraPadding),
-              child: new DealsLogo(height: appBarHeight, t: t.clamp(0.0, 1.0)));
+              child: new DealsLogo(height: appBarHeight, t: t.clamp(0.0, 1.0),
+                onSettings: () {
+                      config.changer(config.userConfig..onBoarded = false);
+                    }
+                ));
         }));
   }
 
@@ -139,6 +148,7 @@ class DealsPageState extends State<DealsPage> {
       new ScrollableGrid(
           scrollableKey: scrollableKey,
           delegate: new MaxTileWidthGridDelegate(
+              tileAspectRatio: 1.3,
               rowSpacing: 8.0,
               columnSpacing: 8.0,
               padding: padding,

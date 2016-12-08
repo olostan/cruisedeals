@@ -1,6 +1,8 @@
 import 'package:cruisedeals/models/userConfig.dart';
 import 'package:flutter/material.dart';
 
+typedef UserConfig ConfigChanger(UserConfig config);
+
 class _CheckableItem extends StatefulWidget {
   _CheckableItem({Key key, this.initialValue, this.onChanged, this.child})
       : super(key: key);
@@ -12,6 +14,8 @@ class _CheckableItem extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => new _CheckableItemState(initialValue);
 }
+
+
 
 class _CheckableItemState<T> extends State<_CheckableItem> {
   _CheckableItemState(this.value): super();
@@ -84,10 +88,10 @@ class _TextCheckableItem extends StatelessWidget {
 
 
 class LoginPage extends StatefulWidget {
-  UserConfigUpdate onUpdateConfig;
+  UserConfigChanger onUpdateConfig;
   UserConfig userConfig;
 
-  LoginPage({Key key, UserConfigUpdate this.onUpdateConfig, this.userConfig}) : super(key: key);
+  LoginPage({Key key, UserConfigChanger this.onUpdateConfig, this.userConfig}) : super(key: key);
 
   @override
   LoginPageState createState() => new LoginPageState();
@@ -99,6 +103,14 @@ class LoginPageState extends State<LoginPage> {
   Set<String> lines = new Set<String>();
   Set<String> destinations = new Set<String>();
   Set<String> times = new Set<String>();
+
+  @override
+  void initState() {
+    super.initState();
+    lines = new Set.from(config.userConfig.lines??[]);
+    destinations = new Set.from(config.userConfig.destinations??[]);
+    times = new Set.from(config.userConfig.times??[]);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -130,16 +142,29 @@ class LoginPageState extends State<LoginPage> {
                       } );
                   }):new RaisedButton(
                       color: new Color(0xff8dbd35),
-                      child: new Text("Take me to the Deals!", style: new TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20.0)), onPressed: ()  {
-                    setState(() {
-                      //step = 0;
-                      config.userConfig.onBoarded = true;
-                      this.config.onUpdateConfig(config.userConfig);
-
-                      //_openDeals(context);
-                    } );
-                  })
+                      child: new Text("Take me to the Deals!", style: new TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20.0)),
+                      onPressed: _configUpdater(
+                        (cfg) => cfg..onBoarded=true
+                      ))
                 ]))));
+  }
+  void _updateConfig(ConfigChanger changer) {
+    print("Preparing to updae");
+     setState(()  {
+       print("updating change");
+
+       config.userConfig = changer(config.userConfig);
+       this.config.onUpdateConfig(config.userConfig);
+    });
+  }
+  VoidCallback _configUpdater(ConfigChanger changer) {
+    return () => _updateConfig(changer);
+  }
+  UserConfig _updateState(UserConfig cfg) {
+    setState(() {
+      config.userConfig = cfg;
+    });
+    return cfg;
   }
 
 /*  void _openDeals(BuildContext context) {
@@ -205,12 +230,16 @@ class LoginPageState extends State<LoginPage> {
               }),
               new SizedBox(height: 20.0),
               new Text("Length of time you’d like to cruise for:",textAlign: TextAlign.center),
-              new RaisedButton(child: new Text(_GetTextForLength()),onPressed: () {}),
+              new RaisedButton(child: new Text(_GetTextForLength()),onPressed: () {
+                showDialog(context:context,child:new _LengthDialog(userConfig: config.userConfig, changer: _updateState));
+
+              }),
             ])));
   }
   String _GetTextForLength() {
     if (config.userConfig==null) return "Click here to select";
-    return "${config.userConfig.lengthMin}-${config.userConfig.lengthMax}";
+    if (config.userConfig.lengthMin == config.userConfig.lengthMax) return "Exactly ${config.userConfig.lengthMin} days";
+    return "Approximately ${config.userConfig.lengthMin}-${config.userConfig.lengthMax} days";
   }
   Widget _GetTextForBox(Set<String> values, List<KeyName> dic) {
     if (values.length ==0) return new Text("Click here ot select");
@@ -236,6 +265,9 @@ class LoginPageState extends State<LoginPage> {
               color: new Color(0xfff8ae4c),
               child: new Text("Confirm Selection", style: new TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
               onPressed: ()  {
+                  setState(() {
+                    config.onUpdateConfig(config.userConfig..lines = lines.toList(growable: false));
+                  });
                   Navigator.pop(context);
               }
           ))
@@ -261,6 +293,9 @@ class LoginPageState extends State<LoginPage> {
               color: new Color(0xfff8ae4c),
               child: new Text("Confirm Selection", style: new TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
               onPressed: ()  {
+                setState(() {
+                  config.onUpdateConfig(config.userConfig..destinations = destinations.toList(growable: false));
+                });
                 Navigator.pop(context);
               }
           )
@@ -275,11 +310,86 @@ class LoginPageState extends State<LoginPage> {
                 color: new Color(0xfff8ae4c),
                 child: new Text("Confirm Selection", style: new TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                 onPressed: ()  {
+                  setState(() {
+                    config.onUpdateConfig(config.userConfig..times= times.toList(growable: false));
+                  });
                   Navigator.pop(context);
                 }
             )
         )
     );
   }
+  Widget _LengthDialogOld() {
+    return new SimpleDialog(
+        title: new Text('Select Times of the year'),
+        children: [
+            new Text("Minimal number of days:"),
+            //new Slider(value: config.userConfig.lengthMin.toDouble(), onChanged: (nv) => _configUpdater( (cfg) => cfg..lengthMin=nv.toInt()), max: 10.0),
+            new Slider(value: config.userConfig.lengthMin.toDouble(), onChanged: (nv) {
+              print("Changed to ${nv}");
+              _updateConfig( (cfg) => cfg..lengthMin = nv.toInt());
 
+            }, max: 10.0),
+            new Text("Maximum number of days:"),
+            new Slider(value: config.userConfig.lengthMax.toDouble(), onChanged: (nv) => _configUpdater( (cfg) => cfg..lengthMax=nv.toInt()), max: 20.0),
+
+            new RaisedButton(
+                color: new Color(0xfff8ae4c),
+                child: new Text("Confirm Selection", style: new TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                onPressed:  ()  {
+                  Navigator.pop(context);
+                }
+            )
+        ]
+
+    );
+  }
+
+}
+
+class _LengthDialog extends StatefulWidget {
+
+  UserConfig userConfig;
+  ConfigChanger changer;
+  _LengthDialog({Key key, this.userConfig, this.changer}): super(key:key);
+
+  @override
+  State<StatefulWidget> createState() {
+    return new _LengthDialogState();
+  }
+}
+
+typedef _valueConfigChanger(UserConfig state, int newValue);
+
+class _LengthDialogState extends State<_LengthDialog> {
+
+  _valueUpdater(_valueConfigChanger vcb) {
+    return (double nv) {
+    setState( () {
+      this.config.userConfig = this.config.changer(vcb(this.config.userConfig,nv.toInt()));
+    });
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new SimpleDialog(
+        title: new Text('Select Times of the year:'),
+        children: [
+          new Text("Minimal stay - ${config.userConfig.lengthMin} days.", textAlign: TextAlign.center),
+          new Slider(value: config.userConfig.lengthMin.toDouble(), onChanged: _valueUpdater((cfg, nv) => cfg..lengthMin=nv), min: 1.0, max: config.userConfig.lengthMax.toDouble(), label: "${this.config.userConfig.lengthMin.toInt()}"),
+          new Text("Maximum stay  - ${config.userConfig.lengthMax} days.", textAlign: TextAlign.center),
+          new Slider(value: config.userConfig.lengthMax.toDouble(), onChanged: _valueUpdater((cfg, nv) => cfg..lengthMax=nv), min: config.userConfig.lengthMin.toDouble(),max:30.0, label: "${this.config.userConfig.lengthMax.toInt()}"),
+
+          new RaisedButton(
+              color: new Color(0xfff8ae4c),
+              child: new Text("Confirm Selection", style: new TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              onPressed:  ()  {
+                Navigator.pop(context);
+              }
+          )
+        ]
+
+    );
+  }
 }
