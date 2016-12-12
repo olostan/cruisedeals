@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 
 class DealsLogo extends StatefulWidget {
@@ -87,7 +88,11 @@ class _DealsLogoState extends State<DealsLogo> {
           )),
           new Positioned(left:0.0, top:75.0-_upPosition.transform(1-config.t)*55,right: 0.0,
               child: new Opacity(opacity: _textOpacity.transform(config.t),child:
-               new Text("0800 107 1590", style: new TextStyle(color: Colors.white,fontWeight: FontWeight.bold, fontSize: 28.0),textAlign: TextAlign.center)
+                  new GestureDetector(
+                    onTap: () {
+                      UrlLauncher.launch("tel:/0800-107-1590");
+                    },
+                    child:new Text("✆ 0800 107 1590", style: new TextStyle(color: Colors.white,fontWeight: FontWeight.bold, fontSize: 28.0),textAlign: TextAlign.center))
           )),
           new Positioned(right: 10.0, top:75.0-_upPosition.transform(1-config.t)*55,
               child: new Opacity(opacity: _textOpacity.transform(config.t),child:

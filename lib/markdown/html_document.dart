@@ -20,7 +20,7 @@ String _highLight(String s,int pos) {
 }
 bool strict = false;
 
-_ParseRes _parse(String s,[int pos=0]) {
+_ParseRes _parse(String s,[int pos=0, List<String> opened]) {
   var text = "";
   var startPos = pos;
   List<Node> children = [];
@@ -46,7 +46,7 @@ _ParseRes _parse(String s,[int pos=0]) {
     var ch = s[pos];
     if (ch=='<') {
       if (s[pos+1]!='/') {
-        var res = _parse(s,pos);
+        var res = _parse(s,pos, opened==null?[tag]:opened..add(tag));
         if (text!="") { children.add(new Text(text));text="";}
         children.add(res.e);
         pos=res.pos+1;
@@ -62,16 +62,23 @@ _ParseRes _parse(String s,[int pos=0]) {
           }
           else
           if (strict) {
-            throw "Element '${tag}' is not closed. Element '${endTag}' was closed instead.";
+            throw "Element '${tag}' (pos ${startPos}) is not closed. Element '${endTag}' (${pos}) was closed instead.";
           } else {
-            pos++;
-            //pos = epos;
-            continue;
+            // check if we have opened tag that match this closing
+            if (opened!=null && opened.contains(endTag)) {
+              // if we found - we've done with current tag
+              pos = epos-1;
+            } else {
+              pos++;
+              //pos = epos;
+              continue;
+            }
           }
         }
         var element = new Element(tag, children);
         if (attributes.length>0) element.attributes.addAll(attributes);
         if (text!="") element.children.add(new Text(text));
+        opened?.removeLast();
         return new _ParseRes()..e=element..pos = pos;
       }
     } else {
@@ -84,7 +91,10 @@ _ParseRes _parse(String s,[int pos=0]) {
   var element = new Element(tag, children);
   if (attributes.length>0) element.attributes.addAll(attributes);
   if (text!="") element.children.add(new Text(text));
+  opened?.removeLast();
+
   return new _ParseRes()..e=element..pos = pos;
+
 }
 
 typedef Node Resolver(String name);

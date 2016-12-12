@@ -3,6 +3,7 @@
 import 'package:cruisedeals/deals/deal_details.dart';
 import 'package:cruisedeals/models/deal.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class DealPage extends StatefulWidget {
   DealPage({ Key key, this.deal }) : super(key: key);
@@ -61,7 +62,9 @@ class _DealPageState extends State<DealPage> {
         floatingActionButton: new FloatingActionButton(
           tooltip: 'Call',
           child: new Icon(Icons.phone),
-          onPressed: null,
+          onPressed: () {
+            UrlLauncher.launch('tel:/0800-107-1590');
+          },
         )
     );
   }
