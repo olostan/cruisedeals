@@ -145,29 +145,29 @@ class _MarkdownBodyRawState extends State<MarkdownBodyRaw> {
   }
 
   @override
-  void didUpdateConfig(MarkdownBodyRaw oldConfig) {
-    super.didUpdateConfig(oldConfig);
+  void didUpdateWidget(MarkdownBodyRaw oldWidget) {
+    super.didUpdateWidget(oldWidget);
 
-    if (oldConfig.data != config.data ||
-        oldConfig.markdownStyle != config.markdownStyle ||
-        oldConfig.syntaxHighlighter != config.syntaxHighlighter ||
-        oldConfig.onTapLink != config.onTapLink)
+    if (oldWidget.data != widget.data ||
+        oldWidget.markdownStyle != widget.markdownStyle ||
+        oldWidget.syntaxHighlighter != widget.syntaxHighlighter ||
+        oldWidget.onTapLink != widget.onTapLink)
       _buildMarkdownCache();
   }
 
   void _buildMarkdownCache() {
-    MarkdownStyleRaw markdownStyle = config.markdownStyle ?? config.createDefaultStyle(context);
-    SyntaxHighlighter syntaxHighlighter = config.syntaxHighlighter ?? new _DefaultSyntaxHighlighter(markdownStyle.code);
+    MarkdownStyleRaw markdownStyle = widget.markdownStyle ?? widget.createDefaultStyle(context);
+    SyntaxHighlighter syntaxHighlighter = widget.syntaxHighlighter ?? new _DefaultSyntaxHighlighter(markdownStyle.code);
 
     _linkHandler?.dispose();
-    _linkHandler = new _LinkHandler(config.onTapLink);
+    _linkHandler = new _LinkHandler(widget.onTapLink);
 
     // TODO: This can be optimized by doing the split and removing \r at the same time
-    //List<String> lines = config.data.replaceAll('\r\n', '\n').split('\n');
+    //List<String> lines = widget.data.replaceAll('\r\n', '\n').split('\n');
     md.Document document = new md.Document();
 
     _Renderer renderer = new _Renderer();
-    _cachedBlocks = renderer.render(document.parse(config.data), markdownStyle, syntaxHighlighter, _linkHandler);
+    _cachedBlocks = renderer.render(document.parse(widget.data), markdownStyle, syntaxHighlighter, _linkHandler);
   }
 
   List<_Block> _cachedBlocks;

@@ -46,7 +46,7 @@ class _DealPageState extends State<DealPage> {
           ],
           flexibleSpace: new FlexibleSpaceBar(
               background: new Stack( children: [
-                new Image.network(config.deal.imagePath, fit:ImageFit.cover),
+                new Image.network(widget.deal.imagePath, fit:ImageFit.cover),
                 new DecoratedBox(
                   decoration: new BoxDecoration(
                       gradient: new LinearGradient(
@@ -84,9 +84,9 @@ class _DealPageState extends State<DealPage> {
               right: 0.0,
               height: appBarHeight + fabHalfSize,
               child: new Hero(
-                  tag: config.deal.imagePath,
+                  tag: widget.deal.imagePath,
                   child: new Image.network(
-                      config.deal.imagePath,
+                      widget.deal.imagePath,
                       fit: ImageFit.fitWidth
                   )
               )
@@ -103,7 +103,7 @@ class _DealPageState extends State<DealPage> {
                   child: new RepaintBoundary(
                       child: new Padding(
                           padding: new EdgeInsets.only(top: appBarHeight),
-                          child: new DealDetails(deal: config.deal)
+                          child: new DealDetails(deal: widget.deal)
                       )
                   )
               )
