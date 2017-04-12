@@ -48,17 +48,17 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    _readUserConfig().then((UserConfig config) {
+    _readUserConfig().then((UserConfig widget) {
       setState(() {
-        print("Config: ${config}");
-        userConfig = config;
+        print("widget: ${widget}");
+        userConfig = widget;
       });
     });
   }
   Future<File> _getLocalFile() async {
     // get the path to the document directory.
     String dir = (await PathProvider.getApplicationDocumentsDirectory()).path;
-    return new File('$dir/config.txt');
+    return new File('$dir/widget.txt');
   }
 
   Future<UserConfig> _readUserConfig() async {
@@ -71,11 +71,11 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  void updateConfig(UserConfig config) {
+  void updateConfig(UserConfig widget) {
     setState(() {
-      print("Got new config: ${config}");
-      userConfig = config;
-      _getLocalFile().then((f) => f.writeAsString(JSON.encode(config)));
+      print("Got new widget: ${widget}");
+      userConfig = widget;
+      _getLocalFile().then((f) => f.writeAsString(JSON.encode(widget)));
     });
   }
 

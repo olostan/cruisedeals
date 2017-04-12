@@ -128,7 +128,7 @@ class DealsPageState extends State<DealsPage> {
                   bottom: extraPadding),
               child: new DealsLogo(height: appBarHeight, t: t.clamp(0.0, 1.0),
                 onSettings: () {
-                      config.changer(config.userConfig..onBoarded = false);
+                      widget.changer(widget.userConfig..onBoarded = false);
                     }
                 ));
         }));

@@ -1,7 +1,7 @@
 import 'package:cruisedeals/models/userConfig.dart';
 import 'package:flutter/material.dart';
 
-typedef UserConfig ConfigChanger(UserConfig config);
+typedef UserConfig ConfigChanger(UserConfig widget);
 
 class _CheckableItem extends StatefulWidget {
   _CheckableItem({Key key, this.initialValue, this.onChanged, this.child})
@@ -26,7 +26,7 @@ class _CheckableItemState<T> extends State<_CheckableItem> {
     return new InkWell(
         onTap: () {
           setState(() => value = !value);
-          this.config.onChanged(value);
+          this.widget.onChanged(value);
         },
         child: new Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 24.0),
@@ -37,7 +37,7 @@ class _CheckableItemState<T> extends State<_CheckableItem> {
                   new Icon(value?Icons.check_circle:Icons.check_circle_outline, size: 36.0, color: Colors.black),
                   new Padding(
                       padding: const EdgeInsets.only(left: 16.0),
-                      child: config.child
+                      child: widget.child
                   )
                 ]
             )
@@ -98,7 +98,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class LoginPageState extends State<LoginPage> {
-  int get step => config.userConfig==null||config.userConfig.email==null?0:1;
+  int get step => widget.userConfig==null||widget.userConfig.email==null?0:1;
 
   Set<String> lines = new Set<String>();
   Set<String> destinations = new Set<String>();
@@ -107,9 +107,9 @@ class LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    lines = new Set.from(config.userConfig.lines??[]);
-    destinations = new Set.from(config.userConfig.destinations??[]);
-    times = new Set.from(config.userConfig.times??[]);
+    lines = new Set.from(widget.userConfig.lines??[]);
+    destinations = new Set.from(widget.userConfig.destinations??[]);
+    times = new Set.from(widget.userConfig.times??[]);
   }
 
   @override
@@ -138,7 +138,7 @@ class LoginPageState extends State<LoginPage> {
                       child: new Text("Skip this step"), onPressed: ()  {
                     setState(() {
                       var userConfig = new UserConfig.Anonymous();
-                      this.config.onUpdateConfig(userConfig);
+                      this.widget.onUpdateConfig(userConfig);
                       } );
                   }):new RaisedButton(
                       color: new Color(0xff8dbd35),
@@ -153,8 +153,8 @@ class LoginPageState extends State<LoginPage> {
      setState(()  {
        print("updating change");
 
-       config.userConfig = changer(config.userConfig);
-       this.config.onUpdateConfig(config.userConfig);
+       widget.userConfig = changer(widget.userConfig);
+       this.widget.onUpdateConfig(widget.userConfig);
     });
   }
   VoidCallback _configUpdater(ConfigChanger changer) {
@@ -162,7 +162,7 @@ class LoginPageState extends State<LoginPage> {
   }
   UserConfig _updateState(UserConfig cfg) {
     setState(() {
-      config.userConfig = cfg;
+      widget.userConfig = cfg;
     });
     return cfg;
   }
@@ -231,15 +231,15 @@ class LoginPageState extends State<LoginPage> {
               new SizedBox(height: 20.0),
               new Text("Length of time you’d like to cruise for:",textAlign: TextAlign.center),
               new RaisedButton(child: new Text(_GetTextForLength()),onPressed: () {
-                showDialog(context:context,child:new _LengthDialog(userConfig: config.userConfig, changer: _updateState));
+                showDialog(context:context,child:new _LengthDialog(userConfig: widget.userConfig, changer: _updateState));
 
               }),
             ])));
   }
   String _GetTextForLength() {
-    if (config.userConfig==null) return "Click here to select";
-    if (config.userConfig.lengthMin == config.userConfig.lengthMax) return "Exactly ${config.userConfig.lengthMin} days";
-    return "Approximately ${config.userConfig.lengthMin}-${config.userConfig.lengthMax} days";
+    if (widget.userConfig==null) return "Click here to select";
+    if (widget.userConfig.lengthMin == widget.userConfig.lengthMax) return "Exactly ${widget.userConfig.lengthMin} days";
+    return "Approximately ${widget.userConfig.lengthMin}-${widget.userConfig.lengthMax} days";
   }
   Widget _GetTextForBox(Set<String> values, List<KeyName> dic) {
     if (values.length ==0) return new Text("Click here ot select");
@@ -266,7 +266,7 @@ class LoginPageState extends State<LoginPage> {
               child: new Text("Confirm Selection", style: new TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
               onPressed: ()  {
                   setState(() {
-                    config.onUpdateConfig(config.userConfig..lines = lines.toList(growable: false));
+                    widget.onUpdateConfig(widget.userConfig..lines = lines.toList(growable: false));
                   });
                   Navigator.pop(context);
               }
@@ -294,7 +294,7 @@ class LoginPageState extends State<LoginPage> {
               child: new Text("Confirm Selection", style: new TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
               onPressed: ()  {
                 setState(() {
-                  config.onUpdateConfig(config.userConfig..destinations = destinations.toList(growable: false));
+                  widget.onUpdateConfig(widget.userConfig..destinations = destinations.toList(growable: false));
                 });
                 Navigator.pop(context);
               }
@@ -311,7 +311,7 @@ class LoginPageState extends State<LoginPage> {
                 child: new Text("Confirm Selection", style: new TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                 onPressed: ()  {
                   setState(() {
-                    config.onUpdateConfig(config.userConfig..times= times.toList(growable: false));
+                    widget.onUpdateConfig(widget.userConfig..times= times.toList(growable: false));
                   });
                   Navigator.pop(context);
                 }
@@ -324,14 +324,14 @@ class LoginPageState extends State<LoginPage> {
         title: new Text('Select Times of the year'),
         children: [
             new Text("Minimal number of days:"),
-            //new Slider(value: config.userConfig.lengthMin.toDouble(), onChanged: (nv) => _configUpdater( (cfg) => cfg..lengthMin=nv.toInt()), max: 10.0),
-            new Slider(value: config.userConfig.lengthMin.toDouble(), onChanged: (nv) {
+            //new Slider(value: widget.userConfig.lengthMin.toDouble(), onChanged: (nv) => _configUpdater( (cfg) => cfg..lengthMin=nv.toInt()), max: 10.0),
+            new Slider(value: widget.userConfig.lengthMin.toDouble(), onChanged: (nv) {
               print("Changed to ${nv}");
               _updateConfig( (cfg) => cfg..lengthMin = nv.toInt());
 
             }, max: 10.0),
             new Text("Maximum number of days:"),
-            new Slider(value: config.userConfig.lengthMax.toDouble(), onChanged: (nv) => _configUpdater( (cfg) => cfg..lengthMax=nv.toInt()), max: 20.0),
+            new Slider(value: widget.userConfig.lengthMax.toDouble(), onChanged: (nv) => _configUpdater( (cfg) => cfg..lengthMax=nv.toInt()), max: 20.0),
 
             new RaisedButton(
                 color: new Color(0xfff8ae4c),
@@ -366,7 +366,7 @@ class _LengthDialogState extends State<_LengthDialog> {
   _valueUpdater(_valueConfigChanger vcb) {
     return (double nv) {
     setState( () {
-      this.config.userConfig = this.config.changer(vcb(this.config.userConfig,nv.toInt()));
+      this.widget.userConfig = this.widget.changer(vcb(this.widget.userConfig,nv.toInt()));
     });
     };
   }
@@ -376,10 +376,10 @@ class _LengthDialogState extends State<_LengthDialog> {
     return new SimpleDialog(
         title: new Text('Select Times of the year:'),
         children: [
-          new Text("Minimal stay - ${config.userConfig.lengthMin} days.", textAlign: TextAlign.center),
-          new Slider(value: config.userConfig.lengthMin.toDouble(), onChanged: _valueUpdater((cfg, nv) => cfg..lengthMin=nv), min: 1.0, max: config.userConfig.lengthMax.toDouble(), label: "${this.config.userConfig.lengthMin.toInt()}"),
-          new Text("Maximum stay  - ${config.userConfig.lengthMax} days.", textAlign: TextAlign.center),
-          new Slider(value: config.userConfig.lengthMax.toDouble(), onChanged: _valueUpdater((cfg, nv) => cfg..lengthMax=nv), min: config.userConfig.lengthMin.toDouble(),max:30.0, label: "${this.config.userConfig.lengthMax.toInt()}"),
+          new Text("Minimal stay - ${widget.userConfig.lengthMin} days.", textAlign: TextAlign.center),
+          new Slider(value: widget.userConfig.lengthMin.toDouble(), onChanged: _valueUpdater((cfg, nv) => cfg..lengthMin=nv), min: 1.0, max: widget.userConfig.lengthMax.toDouble(), label: "${this.widget.userConfig.lengthMin.toInt()}"),
+          new Text("Maximum stay  - ${widget.userConfig.lengthMax} days.", textAlign: TextAlign.center),
+          new Slider(value: widget.userConfig.lengthMax.toDouble(), onChanged: _valueUpdater((cfg, nv) => cfg..lengthMax=nv), min: widget.userConfig.lengthMin.toDouble(),max:30.0, label: "${this.widget.userConfig.lengthMax.toInt()}"),
 
           new RaisedButton(
               color: new Color(0xfff8ae4c),

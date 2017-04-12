@@ -42,7 +42,7 @@ class _DealsLogoState extends State<DealsLogo> {
   /*@override
   Widget build(BuildContext context) {
     return new Transform(
-        transform: new Matrix4.identity()..scale(config.t.clamp(0.3,1)),
+        transform: new Matrix4.identity()..scale(widget.t.clamp(0.3,1)),
         alignment: FractionalOffset.topCenter,
         child:
             //new SizedBox(
@@ -54,16 +54,16 @@ class _DealsLogoState extends State<DealsLogo> {
                 overflow: Overflow.visible,
                 children: <Widget>[
                   new Positioned.fromRect(
-                      rect: _imageRectTween.lerp(config.t),
+                      rect: _imageRectTween.lerp(widget.t),
                       child: new Image.asset("assets/header-logo-2016.png", fit: ImageFit.contain)
                   ),
                   new Align(alignment: FractionalOffset.topRight,
                       child: new Text("Opening hours is from", style:new TextStyle(fontSize: 18.0, color: Colors.white))
                   ),
                   new Positioned.fromRect(
-                      rect: _textRectTween.lerp(config.t),
+                      rect: _textRectTween.lerp(widget.t),
                       child: new Opacity(
-                        opacity: _textOpacity.transform(config.t),
+                        opacity: _textOpacity.transform(widget.t),
                         child: new Text('Call our cruise experts today!', style: titleStyle, textAlign: TextAlign.center),
                       )
                   )
@@ -82,22 +82,22 @@ class _DealsLogoState extends State<DealsLogo> {
                   alignment: FractionalOffset.topLeft,
                   child:new SizedBox(height: 50.0,child:  new Image.asset("assets/header-logo-2016.png", fit: ImageFit.fill)))
           ),
-          new Positioned(left:0.0, top:55.0-_upPosition.transform(1-config.t)*55,right: 0.0,
-            child: new Opacity(opacity: _textOpacity.transform(config.t),child:
+          new Positioned(left:0.0, top:55.0-_upPosition.transform(1-widget.t)*55,right: 0.0,
+            child: new Opacity(opacity: _textOpacity.transform(widget.t),child:
             new Text("Call our cruise experts today!", style: new TextStyle(color: Colors.white, fontSize: 18.0),textAlign: TextAlign.center)
           )),
-          new Positioned(left:0.0, top:75.0-_upPosition.transform(1-config.t)*55,right: 0.0,
-              child: new Opacity(opacity: _textOpacity.transform(config.t),child:
+          new Positioned(left:0.0, top:75.0-_upPosition.transform(1-widget.t)*55,right: 0.0,
+              child: new Opacity(opacity: _textOpacity.transform(widget.t),child:
                   new GestureDetector(
                     onTap: () {
                       UrlLauncher.launch("tel:/0800-107-1590");
                     },
                     child:new Text("✆ 0800 107 1590", style: new TextStyle(color: Colors.white,fontWeight: FontWeight.bold, fontSize: 28.0),textAlign: TextAlign.center))
           )),
-          new Positioned(right: 10.0, top:75.0-_upPosition.transform(1-config.t)*55,
-              child: new Opacity(opacity: _textOpacity.transform(config.t),child:
+          new Positioned(right: 10.0, top:75.0-_upPosition.transform(1-widget.t)*55,
+              child: new Opacity(opacity: _textOpacity.transform(widget.t),child:
                   new InkWell(
-                      onTap: config.onSettings,
+                      onTap: widget.onSettings,
                       child:
                 new Icon(Icons.settings, color: Colors.white))
               )
